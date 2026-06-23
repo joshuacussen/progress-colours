@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Progress colour calculator</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><defs><clipPath id='c'><rect width='32' height='32' rx='7'/></clipPath></defs><g clip-path='url(%23c)'><rect y='0' width='32' height='6.4' fill='%23E24B4A'/><rect y='6.4' width='32' height='6.4' fill='%23EF9F27'/><rect y='12.8' width='32' height='6.4' fill='%23378ADD'/><rect y='19.2' width='32' height='6.4' fill='%23639922'/><rect y='25.6' width='32' height='6.4' fill='%237F77DD'/></g></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="rainbow-bar" aria-hidden="true">
+    <span class="rb-red"></span>
+    <span class="rb-yellow"></span>
+    <span class="rb-blue"></span>
+    <span class="rb-green"></span>
+    <span class="rb-purple"></span>
+  </div>
+  <h1>Progress colour calculator</h1>
+
+</header>
+
+<div class="container">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('gcse')">GCSE</button>
+    <button class="tab" onclick="switchTab('alevel')">A-level</button>
+  </div>
+
+  <div id="gcse-panel" class="panel active">
+    <div class="card">
+      <div class="card-body">
+        <div class="fields">
+          <div class="field">
+            <label>Blue grade</label>
+            <select id="gcse-blue" onchange="calc('gcse')">
+              <option value="">—</option>
+              <option>9</option><option>8</option><option>7</option><option>6</option>
+              <option>5</option><option>4</option><option>3</option><option>2</option><option>1</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Actual grade</label>
+            <select id="gcse-actual" onchange="calc('gcse')">
+              <option value="">—</option>
+              <option>9</option><option>8</option><option>7</option><option>6</option>
+              <option>5</option><option>4</option><option>3</option><option>2</option><option>1</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div id="gcse-result"></div>
+    </div>
+  </div>
+
+  <div id="alevel-panel" class="panel">
+    <div class="card">
+      <div class="card-body">
+        <div class="fields">
+          <div class="field">
+            <label>MEG</label>
+            <select id="alevel-meg" onchange="calc('alevel')">
+              <option value="">—</option>
+              <option>A*</option><option>A</option><option>B</option><option>C</option>
+              <option>D</option><option>E</option><option>U</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Actual grade</label>
+            <select id="alevel-actual" onchange="calc('alevel')">
+              <option value="">—</option>
+              <option>A*</option><option>A</option><option>B</option><option>C</option>
+              <option>D</option><option>E</option><option>U</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div id="alevel-result"></div>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
