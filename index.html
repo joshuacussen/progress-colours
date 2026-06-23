@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Progress colour calculator</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><defs><clipPath id='c'><rect width='32' height='32' rx='7'/></clipPath></defs><g clip-path='url(%23c)'><rect y='0' width='32' height='6.4' fill='%23E24B4A'/><rect y='6.4' width='32' height='6.4' fill='%23EF9F27'/><rect y='12.8' width='32' height='6.4' fill='%23378ADD'/><rect y='19.2' width='32' height='6.4' fill='%23639922'/><rect y='25.6' width='32' height='6.4' fill='%237F77DD'/></g></svg>">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><defs><clipPath id='c'><rect width='32' height='32' rx='7'/></clipPath></defs><g clip-path='url(%23c)'><rect x='0' width='6.4' height='32' fill='%23E24B4A'/><rect x='6.4' width='6.4' height='32' fill='%23EF9F27'/><rect x='12.8' width='6.4' height='32' fill='%23378ADD'/><rect x='19.2' width='6.4' height='32' fill='%23639922'/><rect x='25.6' width='6.4' height='32' fill='%237F77DD'/></g></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
@@ -21,68 +21,81 @@
     <span class="rb-purple"></span>
   </div>
   <h1>Progress colour calculator</h1>
-
 </header>
 
 <div class="container">
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('gcse')">GCSE</button>
-    <button class="tab" onclick="switchTab('alevel')">A-level</button>
-  </div>
+  <div class="card">
+    <div class="card-body">
+      <div class="field">
+        <label>Course</label>
+        <select id="course" onchange="onTopCourseChange()"></select>
+      </div>
 
-  <div id="gcse-panel" class="panel active">
-    <div class="card">
-      <div class="card-body">
-        <div class="fields">
-          <div class="field">
-            <label>Blue grade</label>
-            <select id="gcse-blue" onchange="calc('gcse')">
-              <option value="">—</option>
-              <option>9</option><option>8</option><option>7</option><option>6</option>
-              <option>5</option><option>4</option><option>3</option><option>2</option><option>1</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Actual grade</label>
-            <select id="gcse-actual" onchange="calc('gcse')">
-              <option value="">—</option>
-              <option>9</option><option>8</option><option>7</option><option>6</option>
-              <option>5</option><option>4</option><option>3</option><option>2</option><option>1</option>
-            </select>
+      <div class="field">
+        <label id="target-label">Blue grade</label>
+        <select id="target" onchange="calc()"></select>
+      </div>
+
+      <div class="field actual-field">
+        <div class="actual-field-header">
+          <label>Actual grade</label>
+          <div class="mode-toggle" role="tablist">
+            <button type="button" class="mode-btn active" data-mode="enter" onclick="setActualMode('enter')">Enter grade</button>
+            <button type="button" class="mode-btn" data-mode="calc" onclick="setActualMode('calc')">Calculate from mark</button>
           </div>
         </div>
+
+        <select id="actual-select" onchange="calc()"></select>
+        <input type="text" id="actual-number" class="number-entry" inputmode="decimal"
+               placeholder="e.g. 7 or 7.33" oninput="calc()" hidden>
+
+        <div id="calc-panel" class="calc-panel" hidden>
+          <div class="fields">
+            <div class="field">
+              <label>Series</label>
+              <select id="series" onchange="onSeriesChange()"></select>
+            </div>
+            <div class="field">
+              <label>Boundary set</label>
+              <select id="boundary" onchange="computeFromMark()">
+                <option value="paper1">Paper 1</option>
+                <option value="paper2">Paper 2</option>
+                <option value="average">Average</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="fields">
+            <div class="field">
+              <label>Your mark</label>
+              <input type="number" id="mark" min="0" inputmode="decimal" oninput="computeFromMark()">
+            </div>
+            <div class="field">
+              <label>Paper total</label>
+              <input type="number" id="maxmark" min="1" inputmode="decimal" oninput="computeFromMark()">
+            </div>
+          </div>
+
+          <button type="button" class="link-btn" onclick="toggleBoundaryTable()">
+            <span>View grade boundaries</span>
+            <span id="boundary-toggle-chevron" class="chevron">›</span>
+          </button>
+          <div id="boundary-table-wrap" class="boundary-table-wrap" hidden></div>
+        </div>
       </div>
-      <div id="gcse-result"></div>
     </div>
-  </div>
 
-  <div id="alevel-panel" class="panel">
-    <div class="card">
-      <div class="card-body">
-        <div class="fields">
-          <div class="field">
-            <label>MEG</label>
-            <select id="alevel-meg" onchange="calc('alevel')">
-              <option value="">—</option>
-              <option>A*</option><option>A</option><option>B</option><option>C</option>
-              <option>D</option><option>E</option><option>U</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Actual grade</label>
-            <select id="alevel-actual" onchange="calc('alevel')">
-              <option value="">—</option>
-              <option>A*</option><option>A</option><option>B</option><option>C</option>
-              <option>D</option><option>E</option><option>U</option>
-            </select>
-          </div>
-        </div>
+    <div class="result-section">
+      <div id="grade-card" class="grade-card" hidden>
+        <div id="calc-result" class="calc-result"></div>
       </div>
-      <div id="alevel-result"></div>
+      <div id="result" class="badge-slot"></div>
     </div>
   </div>
 </div>
 
+<script src="data.js"></script>
+<script src="grading.js"></script>
 <script src="script.js"></script>
 </body>
 </html>
