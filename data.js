@@ -75,6 +75,10 @@ const COURSES = {
         paper1: { maxMark: 140, thresholds: { "A*": 103, "A": 91, "B": 75, "C": 60, "D": 45, "E": 30 } },
         paper2: { maxMark: 140, thresholds: { "A*": 120, "A": 105, "B": 88, "C": 69, "D": 51, "E": 33 } }
       },
+      "june-2024": {
+        paper1: { maxMark: 140, thresholds: { "A*": 115, "A": 101, "B": 85, "C": 69, "D": 53, "E": 37 } },
+        paper2: { maxMark: 140, thresholds: { "A*": 114, "A": 99, "B": 83, "C": 66, "D": 49, "E": 33 } }
+      },
       "june-2025": {
         paper1: { maxMark: 140, thresholds: { "A*": 112, "A": 99, "B": 84, "C": 69, "D": 54, "E": 40 } },
         paper2: { maxMark: 140, thresholds: { "A*": 116, "A": 101, "B": 85, "C": 70, "D": 54, "E": 39 } }
