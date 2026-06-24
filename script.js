@@ -206,7 +206,7 @@ function renderBoundaryTable() {
     const pct = isAverage ? lower : (lower / refMax) * 100;
     const originalText = isAverage ? "—" : `${lower} / ${refMax}`;
     const scaledText = hasStudentMax
-      ? (isAverage ? `${Math.ceil(lower / 100 * studentMax)} / ${studentMax}` : `${Math.ceil(lower * (studentMax / refMax))} / ${studentMax}`)
+      ? (isAverage ? `${Math.round(lower / 100 * studentMax)} / ${studentMax}` : `${Math.round(lower * (studentMax / refMax))} / ${studentMax}`)
       : "—";
     return `<tr><td class="grade-cell">${g}</td><td>${pct.toFixed(1)}%</td><td>${originalText}</td><td>${scaledText}</td></tr>`;
   }).join("");

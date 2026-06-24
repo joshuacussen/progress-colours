@@ -116,7 +116,12 @@ function calculateGradeDetails(course, seriesKey, boundaryKey, studentMark, stud
     refMax = series[boundaryKey].maxMark;
   }
 
-  const scaledScore = (studentMark / studentMax) * refMax;
+  // Matches the school's own spreadsheet convention exactly:
+  // =ROUND(mark/old_max*new_max, 0) — round to nearest, not up or
+  // down. This rounded value is then used for everything downstream
+  // (grade lookup and both marks-distance figures), the same way the
+  // spreadsheet treats it as the real mark going forward.
+  const scaledScore = Math.round((studentMark / studentMax) * refMax);
   const scaleFactor  = studentMax / refMax; // converts a gap in the boundary's scale back to the student's own marks
   const result = evaluateScore(thresholds, refMax, gradeOrder, scaledScore);
 
@@ -128,17 +133,14 @@ function calculateGradeDetails(course, seriesKey, boundaryKey, studentMark, stud
       label: "U",
       grade: "U",
       marksAboveBoundary: null,
-      marksToNextGrade: lowestLower !== undefined ? Math.ceil((lowestLower - scaledScore) * scaleFactor) : null,
+      marksToNextGrade: lowestLower !== undefined ? Math.round((lowestLower - scaledScore) * scaleFactor) : null,
       nextGrade: lowestGrade,
       thresholds, refMax, scaleFactor
     };
   }
 
-  // marksAboveBoundary rounds down (marks already secured shouldn't be
-  // overstated); marksToNextGrade rounds up (you can't partially clear
-  // a threshold — real marks only come in whole numbers).
-  const marksAboveBoundary = Math.floor((scaledScore - result.lower) * scaleFactor);
-  const marksToNextGrade   = result.index === 0 ? null : Math.ceil((result.upper - scaledScore) * scaleFactor);
+  const marksAboveBoundary = Math.round((scaledScore - result.lower) * scaleFactor);
+  const marksToNextGrade   = result.index === 0 ? null : Math.round((result.upper - scaledScore) * scaleFactor);
   const nextGrade           = result.index === 0 ? null : gradeOrder[result.index - 1];
 
   return {
@@ -155,8 +157,6 @@ function calculateGradeDetails(course, seriesKey, boundaryKey, studentMark, stud
 function calculateGradeFromMark(course, seriesKey, boundaryKey, studentMark, studentMax) {
   return calculateGradeDetails(course, seriesKey, boundaryKey, studentMark, studentMax).label;
 }
-
-function round1(n) { return Math.round(n * 10) / 10; }
 
 // ─────────────────────────────────────────────────────────────────
 // PROGRESS BAND
