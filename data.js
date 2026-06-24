@@ -79,12 +79,6 @@ const COURSES = {
         paper1: { maxMark: 140, thresholds: { "A*": 112, "A": 99, "B": 84, "C": 69, "D": 54, "E": 40 } },
         paper2: { maxMark: 140, thresholds: { "A*": 116, "A": 101, "B": 85, "C": 70, "D": 54, "E": 39 } }
       }
-
-      // "Y12 Practice 2024" intentionally omitted: only an Average
-      // boundary was supplied (no paper1/paper2 to derive it from),
-      // and this practice paper's own total mark wasn't given. Add it
-      // here once both are known — same shape as the series above,
-      // or as a standalone average set if there's genuinely no split paper.
     }
   }
 };
