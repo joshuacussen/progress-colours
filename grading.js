@@ -75,12 +75,15 @@ function gradeFromScore(thresholds, maxScore, gradeOrder) {
 }
 
 // ─────────────────────────────────────────────────────────────────
-// DERIVED AVERAGE BOUNDARIES
-// Builds a percentage-based threshold table from paper1 + paper2,
-// grade by grade, so an "average" boundary set never has to be
-// typed in or kept in sync by hand.
+// AVERAGE BOUNDARY — PERCENTAGE VIEW (informational only)
+// Used purely for the % column in the boundary table. This is NOT
+// used to decide grades — averaging percentages independently of
+// any target paper size is fine for display, but it's not the real,
+// lockable boundary a candidate is actually held to. See
+// deriveAverageThresholds below for the version that grading
+// decisions are based on.
 // ─────────────────────────────────────────────────────────────────
-function deriveAverageThresholds(paper1, paper2, gradeOrder) {
+function deriveAveragePercentages(paper1, paper2, gradeOrder) {
   const thresholds = {};
   gradeOrder.forEach(grade => {
     const p1 = paper1.thresholds[grade];
@@ -94,13 +97,42 @@ function deriveAverageThresholds(paper1, paper2, gradeOrder) {
 }
 
 // ─────────────────────────────────────────────────────────────────
+// AVERAGE BOUNDARY — LOCKED INTEGER VIEW (used for grading)
+// Scales each paper's boundary directly onto the target paper's
+// mark scale, averages the two scaled marks, then rounds ONCE to a
+// whole mark. That whole mark is the real boundary — a candidate's
+// raw mark is always a whole number, so the threshold they're held
+// to has to be a whole number too, fixed at this point and never
+// recomputed in percentage space afterwards. This mirrors exactly
+// how a grade boundary is set on a real paper: an integer mark,
+// locked in, with no fractional cutoff that no script could ever
+// actually score.
+// ─────────────────────────────────────────────────────────────────
+function deriveAverageThresholds(paper1, paper2, gradeOrder, targetMax) {
+  const thresholds = {};
+  gradeOrder.forEach(grade => {
+    const p1 = paper1.thresholds[grade];
+    const p2 = paper2.thresholds[grade];
+    if (p1 === undefined || p2 === undefined) return;
+    const scaled1 = (p1 / paper1.maxMark) * targetMax;
+    const scaled2 = (p2 / paper2.maxMark) * targetMax;
+    thresholds[grade] = Math.round((scaled1 + scaled2) / 2);
+  });
+  return thresholds;
+}
+
+// ─────────────────────────────────────────────────────────────────
 // Work out a grade — and how close the student is to the grade
 // above and below it — from a raw mark, for a given course /
 // series / boundary set ("paper1" | "paper2" | "average").
 //
-// "Marks above/to next" are always expressed in the student's own
-// paper total, even when the boundary set being compared against
-// has a different total — the scaling is undone on the way back out.
+// For "average", the boundary is locked directly onto the student's
+// own paper size (see deriveAverageThresholds), so the student's
+// mark is compared against it with no conversion at all — it's
+// already on the same integer scale. For a single paper whose
+// maxMark differs from the student's own paper total, the mark is
+// scaled exactly as before, matching the school's own spreadsheet
+// convention: =ROUND(mark/old_max*new_max, 0).
 // ─────────────────────────────────────────────────────────────────
 function calculateGradeDetails(course, seriesKey, boundaryKey, studentMark, studentMax) {
   const gradeType  = GRADE_TYPES[course.gradeType];
@@ -109,20 +141,19 @@ function calculateGradeDetails(course, seriesKey, boundaryKey, studentMark, stud
 
   let thresholds, refMax;
   if (boundaryKey === "average") {
-    thresholds = deriveAverageThresholds(series.paper1, series.paper2, gradeOrder);
-    refMax = 100;
+    thresholds = deriveAverageThresholds(series.paper1, series.paper2, gradeOrder, studentMax);
+    refMax = studentMax;
   } else {
     thresholds = series[boundaryKey].thresholds;
     refMax = series[boundaryKey].maxMark;
   }
 
-  // Matches the school's own spreadsheet convention exactly:
-  // =ROUND(mark/old_max*new_max, 0) — round to nearest, not up or
-  // down. This rounded value is then used for everything downstream
-  // (grade lookup and both marks-distance figures), the same way the
-  // spreadsheet treats it as the real mark going forward.
+  // For "average", refMax === studentMax, so this is just studentMark
+  // itself (no real scaling happens — it cancels out). For a single
+  // paper with a different total, this scales the mark the same way
+  // it always has.
   const scaledScore = Math.round((studentMark / studentMax) * refMax);
-  const scaleFactor  = studentMax / refMax; // converts a gap in the boundary's scale back to the student's own marks
+  const scaleFactor  = studentMax / refMax;
   const result = evaluateScore(thresholds, refMax, gradeOrder, scaledScore);
 
   if (!result) {
