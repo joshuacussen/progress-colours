@@ -144,6 +144,10 @@ function computeFromMark() {
     detailLine = aboveText + nextText + ".";
   }
 
+  // For "average", refMax is always the student's own paper total now
+  // (the boundary is locked directly onto it), so this note correctly
+  // never fires for that case — nothing was scaled away from 100 to
+  // get there.
   const scalingNote = maxMark !== details.refMax
     ? `<p class="calc-hint">Boundaries are scaled to ${maxMark} marks rather than ${details.refMax}.</p>`
     : "";
@@ -180,34 +184,49 @@ function renderBoundaryTable() {
   const wrap = document.getElementById("boundary-table-wrap");
   if (wrap.hidden) return;
 
-  const course     = currentCourse();
-  const seriesKey   = document.getElementById("series").value;
-  const boundaryKey = document.getElementById("boundary").value;
+  const course       = currentCourse();
+  const seriesKey    = document.getElementById("series").value;
+  const boundaryKey  = document.getElementById("boundary").value;
   if (!course || !seriesKey) { wrap.innerHTML = ""; return; }
 
-  const gradeOrder  = GRADE_TYPES[course.gradeType].grades;
-  const series      = course.series[seriesKey];
-  const isAverage   = boundaryKey === "average";
-  const studentMax  = parseFloat(document.getElementById("maxmark").value);
-  const hasStudentMax = Number.isFinite(studentMax) && studentMax > 0;
+  const gradeOrder     = GRADE_TYPES[course.gradeType].grades;
+  const series         = course.series[seriesKey];
+  const isAverage      = boundaryKey === "average";
+  const studentMax     = parseFloat(document.getElementById("maxmark").value);
+  const hasStudentMax  = Number.isFinite(studentMax) && studentMax > 0;
 
-  let thresholds, refMax;
-  if (isAverage) {
-    thresholds = deriveAverageThresholds(series.paper1, series.paper2, gradeOrder);
-    refMax = 100;
-  } else {
-    thresholds = series[boundaryKey].thresholds;
-    refMax = series[boundaryKey].maxMark;
-  }
+  // The average boundary's % column is purely informational. The real
+  // boundary — the one grading decisions are made against — only
+  // exists once locked to a target paper size, so it can't be shown
+  // until a paper total has been typed in.
+  const pctThresholds    = isAverage ? deriveAveragePercentages(series.paper1, series.paper2, gradeOrder) : null;
+  const lockedThresholds = isAverage && hasStudentMax
+    ? deriveAverageThresholds(series.paper1, series.paper2, gradeOrder, studentMax)
+    : null;
+
+  const refMax = isAverage ? null : series[boundaryKey].maxMark;
 
   const rows = gradeOrder.map(g => {
-    const lower = thresholds[g];
-    if (lower === undefined) return "";
-    const pct = isAverage ? lower : (lower / refMax) * 100;
-    const originalText = isAverage ? "—" : `${lower} / ${refMax}`;
-    const scaledText = hasStudentMax
-      ? (isAverage ? `${Math.round(lower / 100 * studentMax)} / ${studentMax}` : `${Math.round(lower * (studentMax / refMax))} / ${studentMax}`)
-      : "—";
+    let pct, originalText, scaledText;
+
+    if (isAverage) {
+      const pctLower = pctThresholds[g];
+      if (pctLower === undefined) return "";
+      pct = pctLower;
+      originalText = "—"; // no single "original" paper for an averaged boundary
+      scaledText = lockedThresholds && lockedThresholds[g] !== undefined
+        ? `${lockedThresholds[g]} / ${studentMax}`
+        : "—";
+    } else {
+      const lower = series[boundaryKey].thresholds[g];
+      if (lower === undefined) return "";
+      pct = (lower / refMax) * 100;
+      originalText = `${lower} / ${refMax}`;
+      scaledText = hasStudentMax
+        ? `${Math.round(lower * (studentMax / refMax))} / ${studentMax}`
+        : "—";
+    }
+
     return `<tr><td class="grade-cell">${g}</td><td>${pct.toFixed(1)}%</td><td>${originalText}</td><td>${scaledText}</td></tr>`;
   }).join("");
 
