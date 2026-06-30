@@ -1,9 +1,5 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html {
-  scrollbar-gutter: stable;
-}
-
 :root {
   --bg:        #F5F4F0;
   --surface:   #FFFFFF;
@@ -20,6 +16,10 @@ html {
   --blu-bg:    #E6F1FB; --blu-mid: #378ADD; --blu-border: #85B7EB; --blu-text: #0C447C;
   --grn-bg:    #EAF3DE; --grn-mid: #639922; --grn-border: #97C459; --grn-text: #27500A;
   --pur-bg:    #EEEDFE; --pur-mid: #7F77DD; --pur-border: #AFA9EC; --pur-text: #3C3489;
+}
+
+html {
+  scrollbar-gutter: stable;
 }
 
 body {
