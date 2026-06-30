@@ -372,5 +372,5 @@ function calc() {
   onTopCourseChange(); // builds target/actual options, series list, and restores the saved target grade via calc()
 
   const savedMode = localStorage.getItem("pcc-mode");
-  setActualMode(savedMode === "calc" ? "calc" : "enter");
+  setActualMode(savedMode === "enter" ? "enter" : "calc");
 })();
